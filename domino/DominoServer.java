@@ -7,6 +7,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -19,11 +23,13 @@ public class DominoServer implements Runnable {
     private String inputFileName;
     private String outputFileName;
 
-    private DominoDeck deck;
-
+    private ServerSocket serverSocket;
     private List<Client> clients = new ArrayList<>();
 
+    private DominoDeck deck;
     private int nextNumber = -1;
+
+    private List<String> events = new ArrayList<>();
 
     private DominoServer(int numberOfPlayers, String inputFileName, String outputFileName) {
         this.numberOfPlayers = numberOfPlayers;
@@ -33,7 +39,7 @@ public class DominoServer implements Runnable {
 
     public static void main(String[] args) {
         DominoServer server = new DominoServer(Integer.valueOf(args[0]), args[1], args[2]);
-        new Thread(server).start();
+        server.run();
     }
 
     @Override
@@ -43,6 +49,8 @@ public class DominoServer implements Runnable {
         waitForClients();
         sendDecks();
         play();
+        writeEventsToFile();
+        closeServer();
     }
 
     private void updateNumberOfPlayers() {
@@ -60,7 +68,7 @@ public class DominoServer implements Runnable {
 
     private void waitForClients() {
         try {
-            ServerSocket serverSocket = new ServerSocket(PORT);
+            serverSocket = new ServerSocket(PORT);
             while (clients.size() < numberOfPlayers) {
                 System.out.println("Waiting for a client to join... ");
                 Socket clientSocket = serverSocket.accept();
@@ -97,17 +105,19 @@ public class DominoServer implements Runnable {
 
     private boolean playOneRound() {
         boolean anyMatch = false;
-        
+
         for (Client client : clients) {
             if (nextNumber == -1) {
                 client.write(MSG_START);
                 nextNumber = Integer.valueOf(client.read());
+                events.add(client + ": " + nextNumber);
                 anyMatch = true;
                 continue;
             }
 
             client.write(String.valueOf(nextNumber));
             String messageFromClient = client.read();
+            events.add(client + ": " + messageFromClient);
             switch (messageFromClient) {
                 case MSG_GIVE_A_CARD:
                     DominoCard cardToGive = deck.drawFirstCard();
@@ -134,20 +144,44 @@ public class DominoServer implements Runnable {
             for (Client client : clients) {
                 client.write(MSG_DRAW);
             }
+            events.add(MSG_DRAW);
             return true;
         }
 
         return false;
     }
 
+    private void writeEventsToFile() {
+        Path outputFile = Paths.get(outputFileName);
+        try {
+            Files.write(outputFile, events, Charset.forName("UTF-8"));
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot write to file: " + outputFileName, e);
+        }
+    }
+
+    private void closeServer() {
+        try {
+            serverSocket.close();
+            for (Client client : clients) {
+                client.close();
+            }
+        } catch (IOException e) {
+            // Maybe the port will be in use for a while, but we can't do anything.
+        }
+    }
+
     private class Client {
 
         private String name;
+
+        private Socket socket;
         private Scanner reader;
         private PrintWriter writer;
 
         private Client(String name, Socket socket) {
             this.name = name;
+            this.socket = socket;
             try {
                 reader = new Scanner(socket.getInputStream());
                 writer = new PrintWriter(socket.getOutputStream());
@@ -166,6 +200,10 @@ public class DominoServer implements Runnable {
             System.out.println("Sending message to " + name + ": " + message);
             writer.println(message);
             writer.flush();
+        }
+
+        private void close() throws IOException {
+            socket.close();
         }
 
         @Override

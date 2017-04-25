@@ -1,0 +1,13 @@
+Jatekos1: 5
+Jatekos2: 2
+Jatekos1: 9
+Jatekos2: 4
+Jatekos1: UJ
+Jatekos2: 8
+Jatekos1: 6
+Jatekos2: 1
+Jatekos1: 1
+Jatekos2: UJ
+Jatekos1: UJ
+Jatekos2: UJ
+DONTETLEN

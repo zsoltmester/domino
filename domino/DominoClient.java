@@ -79,6 +79,10 @@ public class DominoClient implements Runnable {
             case MSG_LOSE:
                 return true;
             default:
+                if (deck.isEmpty()) {
+                    sendMessageToServer(MSG_WIN);
+                    return true;
+                }
                 int nextNumber = Integer.valueOf(messageFromServer);
                 DominoCard firstMatchingCard = deck.drawFirstCardForNumber(nextNumber);
                 if (firstMatchingCard == null) {
@@ -88,9 +92,6 @@ public class DominoClient implements Runnable {
                         DominoCard newCard = DominoCard.fromString(newMessageFromServer);
                         deck.addCardToEnd(newCard);
                     }
-                } else if (deck.isEmpty()) {
-                    sendMessageToServer(MSG_WIN);
-                    return true;
                 } else {
                     int newNextNumber = firstMatchingCard.getOtherValue(nextNumber);
                     sendMessageToServer(String.valueOf(newNextNumber));
