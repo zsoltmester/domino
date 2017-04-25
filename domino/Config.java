@@ -13,4 +13,5 @@ class Config {
     static final String MSG_NO_CARD_LEFT = "NINCS";
     static final String MSG_WIN = "NYERTEM";
     static final String MSG_LOSE = "VEGE";
+    static final String MSG_DRAW = "DONTETLEN";
 }

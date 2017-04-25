@@ -75,6 +75,7 @@ public class DominoClient implements Runnable {
                 DominoCard firstCard = deck.drawFirstCard();
                 sendMessageToServer(String.valueOf(firstCard.getFirstValue()));
                 break;
+            case MSG_DRAW:
             case MSG_LOSE:
                 return true;
             default:

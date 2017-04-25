@@ -96,10 +96,13 @@ public class DominoServer implements Runnable {
     }
 
     private boolean playOneRound() {
+        boolean anyMatch = false;
+        
         for (Client client : clients) {
             if (nextNumber == -1) {
                 client.write(MSG_START);
                 nextNumber = Integer.valueOf(client.read());
+                anyMatch = true;
                 continue;
             }
 
@@ -122,9 +125,18 @@ public class DominoServer implements Runnable {
                     }
                     return true;
                 default:
+                    anyMatch = true;
                     nextNumber = Integer.valueOf(messageFromClient);
             }
         }
+
+        if (!anyMatch) {
+            for (Client client : clients) {
+                client.write(MSG_DRAW);
+            }
+            return true;
+        }
+
         return false;
     }
 
