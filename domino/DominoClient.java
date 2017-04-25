@@ -38,34 +38,34 @@ public class DominoClient implements Runnable {
 
     private void joinToServer() {
         try {
-            System.out.println("Waiting for join to the server... ");
+            //System.out.println("Waiting for join to the server... ");
             Socket socket = new Socket(HOST, PORT);
             reader = new Scanner(socket.getInputStream());
             writer = new PrintWriter(socket.getOutputStream());
-            System.out.println("Joined successfully!");
+            //System.out.println("Joined successfully!");
         } catch (IOException e) {
             throw new RuntimeException("Cannot join to server.", e);
         }
     }
 
     private void readDeck() {
-        System.out.println("Waiting for the deck... ");
+        //System.out.println("Waiting for the deck... ");
         for (int i = 0; i < DECK_SIZE; ++i) {
             String cardAsString = readMessageFromServer();
             deck.addCardToEnd(DominoCard.fromString(cardAsString));
         }
-        System.out.println("Got starter deck:\n" + deck);
+        //System.out.println("Got starter deck:\n" + deck);
     }
 
     private void play() {
-        System.out.println("Playing the game...");
+        //System.out.println("Playing the game...");
 
         boolean isGameEnded = false;
         while (!isGameEnded) {
             isGameEnded = playOneRound();
         }
 
-        System.out.println("Game ended!");
+        //System.out.println("Game ended!");
     }
 
     private boolean playOneRound() {
@@ -102,12 +102,12 @@ public class DominoClient implements Runnable {
 
     private String readMessageFromServer() {
         String message = reader.nextLine();
-        System.out.println("Read from server: " + message);
+        //System.out.println("Read from server: " + message);
         return message;
     }
 
     private void sendMessageToServer(String message) {
-        System.out.println("Sending to server: " + message);
+        //System.out.println("Sending to server: " + message);
         writer.println(message);
         writer.flush();
     }
