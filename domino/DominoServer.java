@@ -104,14 +104,11 @@ public class DominoServer implements Runnable {
     }
 
     private boolean playOneRound() {
-        boolean anyMatch = false;
-
         for (Client client : clients) {
             if (nextNumber == -1) {
                 client.write(MSG_START);
                 nextNumber = Integer.valueOf(client.read());
                 events.add(client + ": " + nextNumber);
-                anyMatch = true;
                 continue;
             }
 
@@ -122,8 +119,17 @@ public class DominoServer implements Runnable {
                 case MSG_GIVE_A_CARD:
                     DominoCard cardToGive = deck.drawFirstCard();
                     if (cardToGive == null) {
+                        client.canFindMatch = false;
                         client.write(MSG_NO_CARD_LEFT);
+                        if (!canSomeoneFindMatch()) {
+                            for (Client otherClient : clients) {
+                                otherClient.write(MSG_DRAW);
+                            }
+                            events.add(MSG_DRAW);
+                            return true;
+                        }
                     } else {
+                        client.canFindMatch = true;
                         client.write(cardToGive.toString());
                     }
                     break;
@@ -135,20 +141,25 @@ public class DominoServer implements Runnable {
                     }
                     return true;
                 default:
-                    anyMatch = true;
                     nextNumber = Integer.valueOf(messageFromClient);
+                    for (Client otherClient : clients) {
+                        otherClient.canFindMatch = true;
+                    }
             }
-        }
-
-        if (!anyMatch) {
-            for (Client client : clients) {
-                client.write(MSG_DRAW);
-            }
-            events.add(MSG_DRAW);
-            return true;
         }
 
         return false;
+    }
+
+    private boolean canSomeoneFindMatch() {
+        boolean canSomeoneFindMatch = false;
+        for (Client client : clients) {
+            if (client.canFindMatch) {
+                canSomeoneFindMatch = true;
+            }
+        }
+
+        return canSomeoneFindMatch;
     }
 
     private void writeEventsToFile() {
@@ -178,6 +189,8 @@ public class DominoServer implements Runnable {
         private Socket socket;
         private Scanner reader;
         private PrintWriter writer;
+
+        private boolean canFindMatch = true;
 
         private Client(String name, Socket socket) {
             this.name = name;

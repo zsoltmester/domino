@@ -10,4 +10,7 @@ Jatekos1: UJ
 Jatekos2: UJ
 Jatekos3: UJ
 Jatekos4: UJ
+Jatekos1: UJ
+Jatekos2: UJ
+Jatekos3: UJ
 DONTETLEN
