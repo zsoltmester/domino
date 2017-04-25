@@ -16,6 +16,19 @@ public class DominoCard {
         return card;
     }
 
+    public int getFirstValue() {
+        return values[0];
+    }
+
+    public int getOtherValue(int value) {
+        assert hasValue(value);
+        return values[0] == value ? values[1] : values[0];
+    }
+
+    boolean hasValue(int value) {
+        return values[0] == value || values[1] == value;
+    }
+
     @Override
     public String toString() {
         return values[0] + " " + values[1];

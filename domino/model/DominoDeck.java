@@ -26,12 +26,30 @@ public class DominoDeck {
         return deck;
     }
 
-    public DominoCard drawFirst() {
-        return cards.remove(0);
-    }
-
     public void addCardToEnd(DominoCard card) {
         cards.add(card);
+    }
+
+    public DominoCard drawFirstCard() {
+        return cards.size() == 0 ? null : cards.remove(0);
+    }
+
+    public DominoCard drawFirstCardForNumber(int number) {
+        DominoCard firstMatchingCard = null;
+        for (DominoCard card : cards) {
+            if (card.hasValue(number)) {
+                firstMatchingCard = card;
+                break;
+            }
+        }
+        if (firstMatchingCard != null) {
+            cards.remove(firstMatchingCard);
+        }
+        return firstMatchingCard;
+    }
+
+    public boolean isEmpty() {
+        return cards.size() == 0;
     }
 
     @Override

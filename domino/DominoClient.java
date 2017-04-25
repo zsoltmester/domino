@@ -33,11 +33,12 @@ public class DominoClient implements Runnable {
         joinToServer();
         sendMessageToServer(name);
         readDeck();
+        play();
     }
 
     private void joinToServer() {
         try {
-            System.out.print("Waiting for join to the server... ");
+            System.out.println("Waiting for join to the server... ");
             Socket socket = new Socket(HOST, PORT);
             reader = new Scanner(socket.getInputStream());
             writer = new PrintWriter(socket.getOutputStream());
@@ -48,7 +49,7 @@ public class DominoClient implements Runnable {
     }
 
     private void readDeck() {
-        System.out.print("Waiting for the deck... ");
+        System.out.println("Waiting for the deck... ");
         for (int i = 0; i < DECK_SIZE; ++i) {
             String cardAsString = readMessageFromServer();
             deck.addCardToEnd(DominoCard.fromString(cardAsString));
@@ -56,11 +57,55 @@ public class DominoClient implements Runnable {
         System.out.println("Got starter deck:\n" + deck);
     }
 
+    private void play() {
+        System.out.println("Playing the game...");
+
+        boolean isGameEnded = false;
+        while (!isGameEnded) {
+            isGameEnded = playOneRound();
+        }
+
+        System.out.println("Game ended!");
+    }
+
+    private boolean playOneRound() {
+        String messageFromServer = readMessageFromServer();
+        switch (messageFromServer) {
+            case MSG_START:
+                DominoCard firstCard = deck.drawFirstCard();
+                sendMessageToServer(String.valueOf(firstCard.getFirstValue()));
+                break;
+            case MSG_LOSE:
+                return true;
+            default:
+                int nextNumber = Integer.valueOf(messageFromServer);
+                DominoCard firstMatchingCard = deck.drawFirstCardForNumber(nextNumber);
+                if (firstMatchingCard == null) {
+                    sendMessageToServer(MSG_GIVE_A_CARD);
+                    String newMessageFromServer = readMessageFromServer();
+                    if (!newMessageFromServer.equals(MSG_NO_CARD_LEFT)) {
+                        DominoCard newCard = DominoCard.fromString(newMessageFromServer);
+                        deck.addCardToEnd(newCard);
+                    }
+                } else if (deck.isEmpty()) {
+                    sendMessageToServer(MSG_WIN);
+                    return true;
+                } else {
+                    int newNextNumber = firstMatchingCard.getOtherValue(nextNumber);
+                    sendMessageToServer(String.valueOf(newNextNumber));
+                }
+        }
+        return false;
+    }
+
     private String readMessageFromServer() {
-        return reader.nextLine();
+        String message = reader.nextLine();
+        System.out.println("Read from server: " + message);
+        return message;
     }
 
     private void sendMessageToServer(String message) {
+        System.out.println("Sending to server: " + message);
         writer.println(message);
         writer.flush();
     }
