@@ -19,13 +19,13 @@ public class DominoClient implements Runnable {
 
     private DominoDeck deck = new DominoDeck();
 
-    private DominoClient(String name) {
+    protected DominoClient(String name) {
         this.name = name;
     }
 
     public static void main(String[] args) {
         DominoClient client = new DominoClient(args[0]);
-        new Thread(client).start();
+        client.run();
     }
 
     @Override

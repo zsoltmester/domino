@@ -1,9 +1,14 @@
 package domino;
 
-class Config {
+import java.io.File;
+
+public class Config {
 
     static final String HOST = "localhost";
     static final int PORT = 60504;
+
+    public static final String STORAGE_SERVICE = "storage";
+    public static final String STORAGE_DATABASE = "domino_storage" + File.separator + "domino_db";
 
     static final int DECK_SIZE = 7;
 
