@@ -2,4 +2,5 @@
 *.iml
 .idea/
 
+/domino_db_dir/
 /out/

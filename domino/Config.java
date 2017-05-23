@@ -10,6 +10,9 @@ public class Config {
     public static final String STORAGE_SERVICE = "storage";
     public static final String STORAGE_DATABASE = "domino_storage" + File.separator + "domino_db";
 
+    public static final String DATABASE_URL_PREFIX = "jdbc:hsqldb:file:";
+    public static final String DATABASE_DRIVER_CLASS = "org.hsqldb.jdbc.JDBCDriver";
+
     static final int DECK_SIZE = 7;
 
     static final String MSG_INVALID_NUMBER_OF_PLAYERS = "Nem megfelelo a jatekosok szama.";
