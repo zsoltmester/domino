@@ -52,6 +52,18 @@ public class DominoDeck {
         return cards.size() == 0;
     }
 
+    public int size() {
+        return cards.size();
+    }
+
+    public List<String> getAsRawCardList() {
+        List<String> rawCardList = new ArrayList<>();
+        for (DominoCard card : cards) {
+            rawCardList.add(card.toString());
+        }
+        return rawCardList;
+    }
+
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();

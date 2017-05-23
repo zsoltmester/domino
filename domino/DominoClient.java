@@ -17,7 +17,7 @@ public class DominoClient implements Runnable {
     private Scanner reader;
     private PrintWriter writer;
 
-    private DominoDeck deck = new DominoDeck();
+    protected DominoDeck deck = new DominoDeck();
 
     protected DominoClient(String name) {
         this.name = name;
@@ -48,11 +48,13 @@ public class DominoClient implements Runnable {
         }
     }
 
-    private void readDeck() {
+    protected void readDeck() {
         //System.out.println("Waiting for the deck... ");
         for (int i = 0; i < DECK_SIZE; ++i) {
             String cardAsString = readMessageFromServer();
-            deck.addCardToEnd(DominoCard.fromString(cardAsString));
+            if (deck.size() < DECK_SIZE) {
+                deck.addCardToEnd(DominoCard.fromString(cardAsString));
+            }
         }
         //System.out.println("Got starter deck:\n" + deck);
     }
@@ -68,7 +70,7 @@ public class DominoClient implements Runnable {
         //System.out.println("Game ended!");
     }
 
-    private boolean playOneRound() {
+    protected boolean playOneRound() {
         String messageFromServer = readMessageFromServer();
         switch (messageFromServer) {
             case MSG_START:
