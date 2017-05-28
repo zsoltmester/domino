@@ -1,16 +1,11 @@
 package domino;
 
-// Ezután a szokásos módon kommunikál a szerverrel, azonban számolja, hogy hány lépést tett meg. Egy lépés akkor kezdődik meg, amikor a kliens a szervertől a következő üzenetet fogadja (az UJ üzenetre küldött választ ebbe bele nem értve).
-// Amikor saveAfterStep lépés megtörtént, ebbe beleértve a beküldött dominó eltávolítását, illetve az UJ dominó beérkezését, akkor a kliens felveszi a kapcsolatot az RMI szerverrel, és feltölti rá a dominóit a felhasználónevén. (Csak egyszer! Nem kell saveAfterStep lépésenként ezt megismételni, csak az első saveAfterStep lépés után mentünk.)
-
-
 import domino.model.DominoCard;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Arrays;
 import java.util.List;
 
 public class DominoClient2 extends DominoClient {

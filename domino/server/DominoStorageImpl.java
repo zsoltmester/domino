@@ -27,9 +27,13 @@ class DominoStorageImpl extends UnicastRemoteObject implements DominoStorageIfac
     public void save(String userName, List<String> dominos) throws RemoteException {
         try {
             deleteDominosForUser(userName);
-            try (Statement statement = this.databaseConnection.createStatement()) {
+            try (PreparedStatement statement =
+                         this.databaseConnection.prepareStatement("insert into dominos values (?,?,?);")) {
                 for (int i = 0; i < dominos.size(); i++) {
-                    statement.addBatch(getInsertDominoStatement(userName, dominos.get(i), i + 1));
+                    statement.setString(1, userName);
+                    statement.setString(2, dominos.get(i));
+                    statement.setInt(3, i + 1);
+                    statement.addBatch();
                 }
                 this.databaseConnection.setAutoCommit(false);
                 statement.executeBatch();
@@ -44,9 +48,10 @@ class DominoStorageImpl extends UnicastRemoteObject implements DominoStorageIfac
     @Override
     public List<String> load(String userName) throws RemoteException {
         Map<Integer, String> dominosWithIndex = new HashMap<>();
-        try {
-            try (Statement statement = this.databaseConnection.createStatement();
-                 ResultSet results = statement.executeQuery("select * from dominos where dominos.user = '" + userName + "';")) {
+        try (PreparedStatement statement =
+                     this.databaseConnection.prepareStatement("select * from dominos where dominos.user = ?;");) {
+            statement.setString(1, userName);
+            try (ResultSet results = statement.executeQuery()) {
                 while (results.next()) {
                     String domino = results.getString("domino");
                     int index = results.getInt("idx");
@@ -81,12 +86,10 @@ class DominoStorageImpl extends UnicastRemoteObject implements DominoStorageIfac
     }
 
     private void deleteDominosForUser(String userName) throws SQLException {
-        try (Statement statement = this.databaseConnection.createStatement()) {
-            statement.executeUpdate("delete from dominos where user = '" + userName + "';");
+        try (PreparedStatement statement =
+                     this.databaseConnection.prepareStatement("delete from dominos where user = ?;")) {
+            statement.setString(1, userName);
+            statement.executeUpdate();
         }
-    }
-
-    private String getInsertDominoStatement(String userName, String domino, int index) throws SQLException {
-        return "insert into dominos values ('" + userName + "','" + domino + "'," + index + ");";
     }
 }
